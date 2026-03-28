@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npx create-vite@latest . --template react-ts)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(xargs grep:*)",
+      "Bash(sed -i \"s/import { useTripStore } from ''..\\\\/store\\\\/tripStore'';/import { useCurrentTripData } from ''..\\\\/store\\\\/tripStore'';/g\" src/pages/Activities.tsx src/pages/Budget.tsx src/pages/CarRental.tsx src/pages/Checklist.tsx src/pages/Dashboard.tsx src/pages/Flights.tsx src/pages/Hotels.tsx src/pages/Itinerary.tsx)",
+      "Bash(sed -i \"s/useTripStore\\(\\)/useCurrentTripData\\(\\)/g\" src/pages/Activities.tsx src/pages/Budget.tsx src/pages/CarRental.tsx src/pages/Checklist.tsx src/pages/Dashboard.tsx src/pages/Flights.tsx src/pages/Hotels.tsx src/pages/Itinerary.tsx)",
+      "Bash(gh auth:*)",
+      "Bash(git:*)",
+      "Bash(cd:*)",
+      "Bash(sed -i 's/className=\"\"p-6 space-y-6\"\"/className=\"\"p-3 sm:p-6 space-y-4 sm:space-y-6\"\"/g' src/pages/Dashboard.tsx)",
+      "Bash(sed -i 's/className=\"\"p-6 space-y-5\"\"/className=\"\"p-3 sm:p-6 space-y-4 sm:space-y-5\"\"/g' src/pages/Budget.tsx)",
+      "Bash(sed -i 's/className=\"\"p-8 space-y-10\"\"/className=\"\"p-4 sm:p-8 space-y-8 sm:space-y-10\"\"/g' src/pages/Report.tsx)",
+      "Bash(sed -i 's/className=\"\"grid grid-cols-2 md:grid-cols-4 gap-4 mb-6\"\"/className=\"\"grid grid-cols-2 md:grid-cols-4 gap-3 mb-5\"\"/g' src/pages/Report.tsx)",
+      "Bash(sed -i 's/className=\"\"grid grid-cols-3 gap-4 text-center\"\"/className=\"\"grid grid-cols-3 gap-2 text-center\"\"/g' src/pages/Report.tsx)",
+      "Bash(sed -i 's/className=\"\"grid grid-cols-2 md:grid-cols-4 gap-4 mt-8\"\"/className=\"\"grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6\"\"/g' src/pages/Report.tsx)",
+      "Bash(sed -i 's|<div className=\"\"overflow-x-auto\"\">|<div className=\"\"overflow-x-auto -mx-3 sm:mx-0\"\">|g' src/pages/Flights.tsx src/pages/Budget.tsx)",
+      "Bash(sed -i 's|<table className=\"\"w-full text-sm\"\">|<table className=\"\"w-full text-sm min-w-max\"\">|g' src/pages/Flights.tsx src/pages/Budget.tsx)"
+    ]
+  }
+}

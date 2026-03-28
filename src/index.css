@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  direction: rtl;
+  background-color: #f1f5f9;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white text-slate-800 transition-colors;
+  }
+
+  /* Report styles */
+  .report-table {
+    @apply w-full border-collapse text-sm;
+  }
+  .report-table thead tr {
+    @apply bg-slate-50 border-b-2 border-slate-200;
+  }
+  .report-table thead th {
+    @apply px-3 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide;
+  }
+  .report-table tbody tr {
+    @apply border-b border-slate-100 hover:bg-slate-50 transition-colors;
+  }
+  .report-table tbody td {
+    @apply px-3 py-2.5 text-slate-700;
+  }
+  .report-table .totals-row td {
+    @apply bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-800 py-3;
+  }
+
+  .badge {
+    @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-green  { @apply bg-green-100 text-green-700; }
+  .badge-purple { @apply bg-purple-100 text-purple-700; }
+  .badge-orange { @apply bg-orange-100 text-orange-700; }
+  .badge-blue   { @apply bg-blue-100 text-blue-700; }
+  .badge-slate  { @apply bg-slate-100 text-slate-600; }
+}
+
+/* ── Print styles ── */
+@media print {
+  @page { margin: 15mm 12mm; size: A4 portrait; }
+
+  body { background: white !important; font-size: 11px; }
+
+  /* Hide sidebar and print button */
+  aside, .no-print { display: none !important; }
+
+  /* Make main fill full width */
+  main { width: 100% !important; }
+
+  .report-doc { box-shadow: none !important; border: none !important; margin: 0 !important; }
+
+  .report-cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .report-section { page-break-inside: avoid; }
+
+  .report-table { font-size: 10px; }
+
+  /* force backgrounds to print */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
