@@ -47,12 +47,16 @@ export default function Settings() {
   const handleAdd = () => {
     const err = validateForm(false);
     if (err) { setError(err); return; }
-    const ok = addUser(form.username.trim(), form.displayName.trim(), form.password, form.role);
-    if (!ok) { setError('שם משתמש כבר קיים'); return; }
-    setShowAddForm(false);
-    setForm(emptyForm());
-    setError('');
-    flash('משתמש נוסף בהצלחה');
+    try {
+      const ok = addUser(form.username.trim(), form.displayName.trim(), form.password, form.role);
+      if (!ok) { setError('שם משתמש כבר קיים'); return; }
+      setShowAddForm(false);
+      setForm(emptyForm());
+      setError('');
+      flash('משתמש נוסף בהצלחה');
+    } catch (e) {
+      setError('שגיאה בשמירת המשתמש. נסה שוב.');
+    }
   };
 
   const startEdit = (user: AppUser) => {
@@ -65,14 +69,18 @@ export default function Settings() {
   const handleSaveEdit = () => {
     const err = validateForm(true);
     if (err) { setError(err); return; }
-    updateUser(editingId!, {
-      displayName: form.displayName.trim(),
-      role: form.role,
-      ...(form.password ? { password: form.password } : {}),
-    });
-    setEditingId(null);
-    setError('');
-    flash('משתמש עודכן בהצלחה');
+    try {
+      updateUser(editingId!, {
+        displayName: form.displayName.trim(),
+        role: form.role,
+        ...(form.password ? { password: form.password } : {}),
+      });
+      setEditingId(null);
+      setError('');
+      flash('משתמש עודכן בהצלחה');
+    } catch (e) {
+      setError('שגיאה בעדכון המשתמש. נסה שוב.');
+    }
   };
 
   const handleDelete = (user: AppUser) => {
@@ -295,11 +303,11 @@ function UserForm({ form, onChange, showPass, onTogglePass, onSave, onCancel, ti
       </div>
 
       <div className="flex gap-2 mt-5 justify-end">
-        <button onClick={onCancel}
+        <button type="button" onClick={onCancel}
           className="flex items-center gap-1 px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-100 transition-colors">
           <X className="w-4 h-4" /> ביטול
         </button>
-        <button onClick={onSave}
+        <button type="button" onClick={onSave}
           className="flex items-center gap-1 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
           <Check className="w-4 h-4" /> {isEdit ? 'שמור שינויים' : 'הוסף משתמש'}
         </button>

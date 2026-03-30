@@ -98,6 +98,14 @@ export const useAuthStore = create<AuthStore>()(
           u => u.username.toLowerCase() === username.toLowerCase() && u.id !== excludeId
         ),
     }),
-    { name: 'trip-manager-auth' }
+    {
+      name: 'trip-manager-auth',
+      partialize: (state) => ({
+        users: state.users,
+        currentUser: state.currentUser,
+        rememberMe: state.rememberMe,
+        rememberedUsername: state.rememberedUsername,
+      }),
+    }
   )
 );
