@@ -133,6 +133,8 @@ export default function Settings() {
           onCancel={() => { setShowAddForm(false); setError(''); }}
           title="הוספת משתמש חדש"
           isEdit={false}
+          error={error}
+          onClearError={() => setError('')}
         />
       )}
 
@@ -156,6 +158,8 @@ export default function Settings() {
                     onCancel={() => { setEditingId(null); setError(''); }}
                     title={`עריכת משתמש: ${user.username}`}
                     isEdit={true}
+                    error={error}
+                    onClearError={() => setError('')}
                   />
                 </div>
               ) : (
@@ -225,7 +229,7 @@ export default function Settings() {
 }
 
 /* ── User Form (add / edit) ── */
-function UserForm({ form, onChange, showPass, onTogglePass, onSave, onCancel, title, isEdit }: {
+function UserForm({ form, onChange, showPass, onTogglePass, onSave, onCancel, title, isEdit, error, onClearError }: {
   form: FormState;
   onChange: (field: keyof FormState, value: string) => void;
   showPass: boolean;
@@ -234,6 +238,8 @@ function UserForm({ form, onChange, showPass, onTogglePass, onSave, onCancel, ti
   onCancel: () => void;
   title: string;
   isEdit: boolean;
+  error?: string;
+  onClearError?: () => void;
 }) {
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
@@ -302,7 +308,14 @@ function UserForm({ form, onChange, showPass, onTogglePass, onSave, onCancel, ti
         </div>
       </div>
 
-      <div className="flex gap-2 mt-5 justify-end">
+      {error && (
+        <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm mt-4">
+          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+          {onClearError && <button type="button" onClick={onClearError} className="mr-auto text-red-400 hover:text-red-600"><X className="w-4 h-4" /></button>}
+        </div>
+      )}
+
+      <div className="flex gap-2 mt-4 justify-end">
         <button type="button" onClick={onCancel}
           className="flex items-center gap-1 px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-100 transition-colors">
           <X className="w-4 h-4" /> ביטול
