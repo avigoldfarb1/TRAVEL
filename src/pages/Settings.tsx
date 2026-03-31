@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore, AppUser } from '../store/authStore';
-import { Settings as SettingsIcon, Plus, Pencil, Trash2, X, Check, Eye, EyeOff, ShieldCheck, User, AlertCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Plus, Pencil, Trash2, X, Check, Eye, EyeOff, ShieldCheck, User, AlertCircle, Share2 } from 'lucide-react';
 
 type FormState = {
   username: string;
@@ -31,6 +31,17 @@ export default function Settings() {
   const flash = (msg: string) => {
     setSuccessMsg(msg);
     setTimeout(() => setSuccessMsg(''), 2500);
+  };
+
+  const copyJoinLink = (user: AppUser) => {
+    const data = btoa(unescape(encodeURIComponent(JSON.stringify({
+      id: user.id, username: user.username,
+      displayName: user.displayName, passwordHash: user.passwordHash, role: user.role,
+    }))));
+    const url = `${window.location.origin}/join#${data}`;
+    navigator.clipboard.writeText(url).then(() => flash('קישור הצטרפות הועתק!')).catch(() => {
+      prompt('העתק את הקישור:', url);
+    });
   };
 
   const validateForm = (isEdit: boolean): string => {
@@ -201,6 +212,13 @@ export default function Settings() {
                   {/* Actions */}
                   {isAdmin && (
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => copyJoinLink(user)}
+                        className="p-2 text-slate-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                        title="העתק קישור הצטרפות"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => startEdit(user)}
                         className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"

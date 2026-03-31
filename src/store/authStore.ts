@@ -25,6 +25,7 @@ interface AuthStore {
   updateUser: (id: string, updates: { displayName?: string; password?: string; role?: 'admin' | 'user' }) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   usernameExists: (username: string, excludeId?: string) => boolean;
+  importUser: (user: AppUser) => void;
 }
 
 const ADMIN_ID = 'user-avi';
@@ -225,4 +226,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     get().users.some(
       u => u.username.toLowerCase() === username.toLowerCase() && u.id !== excludeId
     ),
+
+  importUser: (user: AppUser) => {
+    // Add or update user from a join link (used on new devices)
+    const exists = get().users.some(u => u.id === user.id);
+    const users = exists
+      ? get().users.map(u => u.id === user.id ? user : u)
+      : [...get().users, user];
+    set({ users });
+    saveLocalUsers(users);
+  },
 }));

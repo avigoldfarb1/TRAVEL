@@ -13,6 +13,7 @@ import Budget from './pages/Budget';
 import Checklist from './pages/Checklist';
 import Report from './pages/Report';
 import Settings from './pages/Settings';
+import Join from './pages/Join';
 import { useAuthStore } from './store/authStore';
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/join" element={<Join />} />
         <Route
           path="/"
           element={

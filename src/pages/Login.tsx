@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Plane, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const { login, rememberedUsername, rememberMe: savedRemember } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [username, setUsername] = useState(savedRemember ? rememberedUsername : '');
+  const joinUsername = searchParams.get('u') ?? '';
+  const [username, setUsername] = useState(joinUsername || (savedRemember ? rememberedUsername : ''));
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(savedRemember);
   const [showPass, setShowPass] = useState(false);
