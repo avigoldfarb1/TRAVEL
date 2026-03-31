@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useCurrentTripData } from '../store/tripStore';
 import { CURRENCY_SYMBOLS } from '../types';
 import { differenceInDays, parseISO, format } from 'date-fns';
-import { Plane, Building2, Car, MapPin, Wallet, CheckSquare, Calendar, TrendingUp, Pencil, X, Check, Settings } from 'lucide-react';
+import { Plane, Building2, Car, MapPin, Wallet, CheckSquare, Calendar, TrendingUp, Pencil, X, Check, Settings, Share2, Eye, Edit3, Copy, CheckCircle } from 'lucide-react';
+import { buildSharedTripData, generateShareLink } from '../utils/shareTrip';
 import { exportToPdf } from '../utils/exportPdf';
 import { exportToExcel } from '../utils/exportExcel';
 import { exportToWord } from '../utils/exportWord';
@@ -19,6 +20,19 @@ export default function Dashboard() {
   const cancelEdit = () => setEditMode(false);
   const saveEdit = () => { updateTrip(form); setEditMode(false); };
   const f = (field: string, value: string | number) => setForm(prev => ({ ...prev, [field]: value }));
+
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copiedType, setCopiedType] = useState<'view' | 'edit' | null>(null);
+
+  const copyLink = (canEdit: boolean) => {
+    const shareData = buildSharedTripData(trip, flights, hotels, carRentals, activities);
+    const link = generateShareLink(shareData, canEdit);
+    const type = canEdit ? 'edit' : 'view';
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2500);
+    }).catch(() => { prompt(canEdit ? 'קישור עריכה:' : 'קישור צפייה:', link); });
+  };
 
   const today = new Date();
   const startDate = parseISO(trip.startDate || new Date().toISOString().slice(0, 10));
@@ -53,6 +67,11 @@ export default function Dashboard() {
           </button>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <button onClick={() => setShareOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-indigo-600 hover:bg-indigo-700 text-white">
+            <Share2 className="w-4 h-4" />
+            שתף טיול
+          </button>
           <button onClick={exportToPdf}
             className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
             ייצוא PDF
@@ -308,6 +327,65 @@ export default function Dashboard() {
           <button onClick={openEdit} className="text-yellow-500 hover:text-yellow-700 transition-colors shrink-0">
             <Pencil className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* ─── Share Modal ─── */}
+      {shareOpen && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" dir="rtl" onClick={() => setShareOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-indigo-500" /> שיתוף הטיול
+              </h2>
+              <button onClick={() => setShareOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500">
+              בחר את רמת הגישה שתרצה להעניק לאנשים שמקבלים את הקישור.
+              <span className="font-medium text-slate-600"> מחירים ותקציב לא יוצגו </span>
+              בשום קישור.
+            </p>
+
+            {/* View-only link */}
+            <div className="border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-blue-500 shrink-0" />
+                <span className="font-semibold text-slate-700">צפייה בלבד</span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">מומלץ</span>
+              </div>
+              <p className="text-xs text-slate-400">המוזמן יוכל לצפות במסלול, טיסות, מלונות ופעילויות — ללא יכולת עריכה.</p>
+              <button
+                onClick={() => copyLink(false)}
+                className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  copiedType === 'view' ? 'bg-green-500 text-white' : 'bg-blue-50 hover:bg-blue-100 text-blue-700'
+                }`}
+              >
+                {copiedType === 'view' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copiedType === 'view' ? 'קישור הועתק!' : 'העתק קישור צפייה'}
+              </button>
+            </div>
+
+            {/* Edit link */}
+            <div className="border border-orange-200 rounded-xl p-4 space-y-2 bg-orange-50/30">
+              <div className="flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-orange-500 shrink-0" />
+                <span className="font-semibold text-slate-700">עריכה משותפת</span>
+              </div>
+              <p className="text-xs text-slate-400">המוזמן יוכל לסמן פעילויות כ"הוזמן" ולהוסיף הערות. השינויים נשמרים בדפדפן שלו בלבד.</p>
+              <button
+                onClick={() => copyLink(true)}
+                className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  copiedType === 'edit' ? 'bg-green-500 text-white' : 'bg-orange-100 hover:bg-orange-200 text-orange-700'
+                }`}
+              >
+                {copiedType === 'edit' ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copiedType === 'edit' ? 'קישור הועתק!' : 'העתק קישור עריכה'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
