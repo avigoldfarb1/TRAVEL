@@ -13,6 +13,7 @@ import Budget from './pages/Budget';
 import Checklist from './pages/Checklist';
 import Report from './pages/Report';
 import Settings from './pages/Settings';
+import CurrencyCalculator from './pages/CurrencyCalculator';
 import Join from './pages/Join';
 import SharedTrip from './pages/SharedTrip';
 import { useAuthStore } from './store/authStore';
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="checklist" element={<Checklist />} />
           <Route path="report" element={<Report />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="currency" element={<CurrencyCalculator />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

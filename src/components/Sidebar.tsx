@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Plane, Building2, Car, MapPin,
   Calendar, Wallet, CheckSquare, Plus, Save, ChevronDown,
-  Check, FileText, Settings, LogOut, User, X
+  Check, FileText, Settings, LogOut, User, X, TrendingUp
 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { useAuthStore } from '../store/authStore';
@@ -19,6 +19,7 @@ const navItems = [
   { path: '/budget', label: 'תקציב', icon: Wallet },
   { path: '/checklist', label: 'רשימות תיוג', icon: CheckSquare },
   { path: '/report', label: 'דוח מפורט', icon: FileText },
+  { path: '/currency', label: 'המרת מטבע', icon: TrendingUp },
 ];
 
 interface Props {
