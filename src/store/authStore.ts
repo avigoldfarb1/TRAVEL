@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { hashPassword, checkPassword } from '../utils/hash';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseEnabled } from '../lib/supabase';
 
 export interface AppUser {
   id: string;
@@ -36,6 +36,31 @@ const initialAdmin: AppUser = {
   passwordHash: hashPassword('asla1083'),
   role: 'admin',
 };
+
+// LocalStorage fallback (used when Supabase is not configured)
+const USERS_KEY = 'trip-manager-users';
+
+function loadLocalUsers(): AppUser[] {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    // Also try old Zustand persist format
+    const old = localStorage.getItem('trip-manager-auth');
+    if (old) {
+      const parsed = JSON.parse(old);
+      const data = parsed.state ?? parsed;
+      if (Array.isArray(data.users) && data.users.length > 0) return data.users;
+    }
+  } catch {}
+  return [initialAdmin];
+}
+
+function saveLocalUsers(users: AppUser[]) {
+  try { localStorage.setItem(USERS_KEY, JSON.stringify(users)); } catch {}
+}
 
 // Session persistence (currentUser, rememberMe) stays in localStorage
 const SESSION_KEY = 'trip-manager-session';
@@ -86,6 +111,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   rememberedUsername: session.rememberedUsername,
 
   loadUsers: async () => {
+    if (!supabaseEnabled) {
+      // Fall back to localStorage
+      const saved = loadLocalUsers();
+      set({ users: saved, usersLoaded: true });
+      return;
+    }
     try {
       const { data, error } = await supabase.from('app_users').select('*');
       if (error) throw error;
@@ -104,7 +135,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
     } catch (e) {
       console.error('[authStore] loadUsers failed:', e);
-      set({ usersLoaded: true }); // unblock UI even on error
+      // Fall back to localStorage on error
+      const saved = loadLocalUsers();
+      set({ users: saved, usersLoaded: true });
     }
   },
 
@@ -133,51 +166,59 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       passwordHash: hashPassword(password),
       role,
     };
-    const { error } = await supabase.from('app_users').insert({
-      id: newUser.id,
-      username: newUser.username,
-      display_name: newUser.displayName,
-      password_hash: newUser.passwordHash,
-      role: newUser.role,
-    });
-    if (error) throw new Error(error.message);
-    set(s => ({ users: [...s.users, newUser] }));
+    if (supabaseEnabled) {
+      const { error } = await supabase.from('app_users').insert({
+        id: newUser.id,
+        username: newUser.username,
+        display_name: newUser.displayName,
+        password_hash: newUser.passwordHash,
+        role: newUser.role,
+      });
+      if (error) throw new Error(error.message);
+    }
+    const users = [...get().users, newUser];
+    set({ users });
+    if (!supabaseEnabled) saveLocalUsers(users);
     return true;
   },
 
   updateUser: async (id, updates) => {
-    const dbUpdates: Record<string, unknown> = {};
-    if (updates.displayName !== undefined) dbUpdates.display_name = updates.displayName;
-    if (updates.role !== undefined) dbUpdates.role = updates.role;
-    if (updates.password) dbUpdates.password_hash = hashPassword(updates.password);
-
-    const { error } = await supabase.from('app_users').update(dbUpdates).eq('id', id);
-    if (error) throw new Error(error.message);
-
-    set(s => ({
-      users: s.users.map(u => {
-        if (u.id !== id) return u;
-        return {
-          ...u,
+    if (supabaseEnabled) {
+      const dbUpdates: Record<string, unknown> = {};
+      if (updates.displayName !== undefined) dbUpdates.display_name = updates.displayName;
+      if (updates.role !== undefined) dbUpdates.role = updates.role;
+      if (updates.password) dbUpdates.password_hash = hashPassword(updates.password);
+      const { error } = await supabase.from('app_users').update(dbUpdates).eq('id', id);
+      if (error) throw new Error(error.message);
+    }
+    const users = get().users.map(u => {
+      if (u.id !== id) return u;
+      return {
+        ...u,
+        ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
+        ...(updates.role !== undefined ? { role: updates.role } : {}),
+        ...(updates.password ? { passwordHash: hashPassword(updates.password) } : {}),
+      };
+    });
+    const currentUser = get().currentUser?.id === id
+      ? {
+          ...get().currentUser!,
           ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
           ...(updates.role !== undefined ? { role: updates.role } : {}),
-          ...(updates.password ? { passwordHash: hashPassword(updates.password) } : {}),
-        };
-      }),
-      currentUser: s.currentUser?.id === id
-        ? {
-            ...s.currentUser,
-            ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
-            ...(updates.role !== undefined ? { role: updates.role } : {}),
-          }
-        : s.currentUser,
-    }));
+        }
+      : get().currentUser;
+    set({ users, currentUser });
+    if (!supabaseEnabled) saveLocalUsers(users);
   },
 
   deleteUser: async (id) => {
-    const { error } = await supabase.from('app_users').delete().eq('id', id);
-    if (error) throw new Error(error.message);
-    set(s => ({ users: s.users.filter(u => u.id !== id) }));
+    if (supabaseEnabled) {
+      const { error } = await supabase.from('app_users').delete().eq('id', id);
+      if (error) throw new Error(error.message);
+    }
+    const users = get().users.filter(u => u.id !== id);
+    set({ users });
+    if (!supabaseEnabled) saveLocalUsers(users);
   },
 
   usernameExists: (username, excludeId) =>

@@ -19,7 +19,18 @@
       "Bash(sed -i 's/className=\"\"grid grid-cols-3 gap-4 text-center\"\"/className=\"\"grid grid-cols-3 gap-2 text-center\"\"/g' src/pages/Report.tsx)",
       "Bash(sed -i 's/className=\"\"grid grid-cols-2 md:grid-cols-4 gap-4 mt-8\"\"/className=\"\"grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6\"\"/g' src/pages/Report.tsx)",
       "Bash(sed -i 's|<div className=\"\"overflow-x-auto\"\">|<div className=\"\"overflow-x-auto -mx-3 sm:mx-0\"\">|g' src/pages/Flights.tsx src/pages/Budget.tsx)",
-      "Bash(sed -i 's|<table className=\"\"w-full text-sm\"\">|<table className=\"\"w-full text-sm min-w-max\"\">|g' src/pages/Flights.tsx src/pages/Budget.tsx)"
+      "Bash(sed -i 's|<table className=\"\"w-full text-sm\"\">|<table className=\"\"w-full text-sm min-w-max\"\">|g' src/pages/Flights.tsx src/pages/Budget.tsx)",
+      "Bash(find '/c/Users/USER/Desktop/קלוד קוד/מערכת לניהול טיול/src' -type f \\\\\\(-name *.js -o -name *.jsx -o -name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)",
+      "Bash(netlify --version)",
+      "Bash(vercel --version)",
+      "Bash(netlify deploy:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel link:*)",
+      "Bash(vercel --prod --yes)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel alias:*)"
     ]
   }
 }
