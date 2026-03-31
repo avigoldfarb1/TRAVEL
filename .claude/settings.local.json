@@ -30,7 +30,8 @@
       "Bash(vercel link:*)",
       "Bash(vercel --prod --yes)",
       "Bash(vercel ls:*)",
-      "Bash(vercel alias:*)"
+      "Bash(vercel alias:*)",
+      "Bash(npx vercel:*)"
     ]
   }
 }

@@ -3,6 +3,8 @@ import { useCurrentTripData } from '../store/tripStore';
 import { Flight } from '../types';
 import { CURRENCY_SYMBOLS } from '../types';
 import { Plane, Plus, Trash2, Pencil, X, Check } from 'lucide-react';
+import CalendarSync from '../components/CalendarSync';
+import { flightToCalendarEvent } from '../utils/calendarExport';
 
 const FLIGHT_TYPES = { outbound: 'הלוך', return: 'חזור', connecting: 'מעבר' };
 const CURRENCIES = ['ILS', 'EUR', 'USD', 'GBP'];
@@ -123,9 +125,10 @@ export default function Flights() {
                       <td className="px-4 py-3 font-medium">{CURRENCY_SYMBOLS[flight.currency]}{flight.price.toLocaleString()}</td>
                       <td className="px-4 py-3 text-slate-500 text-xs">{flight.confirmation}</td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button onClick={() => startEdit(flight)} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => deleteFlight(flight.id)} className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        <div className="flex gap-1 items-center">
+                          <CalendarSync event={flightToCalendarEvent(flight)} />
+                          <button onClick={() => startEdit(flight)} className="p-2 text-slate-400 hover:text-blue-500 transition-colors"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => deleteFlight(flight.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>

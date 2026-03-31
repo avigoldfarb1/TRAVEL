@@ -3,6 +3,8 @@ import { useCurrentTripData } from '../store/tripStore';
 import { Activity } from '../types';
 import { CURRENCY_SYMBOLS } from '../types';
 import { MapPin, Plus, Trash2, Pencil, X, Check, Clock } from 'lucide-react';
+import CalendarSync from '../components/CalendarSync';
+import { activityToCalendarEvent } from '../utils/calendarExport';
 
 const CURRENCIES = ['ILS', 'EUR', 'USD', 'GBP'];
 const CATEGORIES: Activity['category'][] = ['תרבות', 'טבע', 'אוכל', 'קניות', 'בידור', 'ספורט', 'אחר'];
@@ -88,9 +90,10 @@ export default function Activities() {
                 </div>
                 {act.notes && <p className="text-sm text-slate-500 mt-1">{act.notes}</p>}
               </div>
-              <div className="flex gap-2 shrink-0">
-                <button onClick={() => { setForm({ ...act }); setEditingId(act.id); setShowForm(false); }} className="text-slate-400 hover:text-blue-500"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => deleteActivity(act.id)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+              <div className="flex gap-1 shrink-0 items-center">
+                <CalendarSync event={activityToCalendarEvent(act)} />
+                <button onClick={() => { setForm({ ...act }); setEditingId(act.id); setShowForm(false); }} className="p-2 text-slate-400 hover:text-blue-500"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => deleteActivity(act.id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           )

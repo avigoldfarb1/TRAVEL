@@ -3,6 +3,8 @@ import { useCurrentTripData } from '../store/tripStore';
 import { Hotel } from '../types';
 import { CURRENCY_SYMBOLS } from '../types';
 import { Building2, Plus, Trash2, Pencil, X, Check, Star, MapPin } from 'lucide-react';
+import CalendarSync from '../components/CalendarSync';
+import { hotelToCalendarEvent } from '../utils/calendarExport';
 import { differenceInDays, parseISO } from 'date-fns';
 
 const CURRENCIES = ['ILS', 'EUR', 'USD', 'GBP'];
@@ -66,9 +68,10 @@ export default function Hotels() {
                     <MapPin className="w-3 h-3" />{hotel.city}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => { setForm({ ...hotel }); setEditingId(hotel.id); setShowForm(false); }} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => deleteHotel(hotel.id)} className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex gap-1 items-center">
+                  <CalendarSync event={hotelToCalendarEvent(hotel)} />
+                  <button onClick={() => { setForm({ ...hotel }); setEditingId(hotel.id); setShowForm(false); }} className="p-2 text-slate-400 hover:text-blue-500 transition-colors"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteHotel(hotel.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
 

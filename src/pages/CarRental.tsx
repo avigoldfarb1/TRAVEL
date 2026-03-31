@@ -3,6 +3,8 @@ import { useCurrentTripData } from '../store/tripStore';
 import { CarRental } from '../types';
 import { CURRENCY_SYMBOLS } from '../types';
 import { Car, Plus, Trash2, Pencil, X, Check, MapPin } from 'lucide-react';
+import CalendarSync from '../components/CalendarSync';
+import { carRentalToCalendarEvent } from '../utils/calendarExport';
 import { differenceInDays, parseISO } from 'date-fns';
 
 const CURRENCIES = ['ILS', 'EUR', 'USD', 'GBP'];
@@ -65,9 +67,10 @@ export default function CarRentalPage() {
                   </div>
                   <p className="text-slate-500 text-sm mt-1">{car.carType}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => { setForm({ ...car }); setEditingId(car.id); setShowForm(false); }} className="text-slate-400 hover:text-blue-500"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => deleteCarRental(car.id)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex gap-1 items-center">
+                  <CalendarSync event={carRentalToCalendarEvent(car)} />
+                  <button onClick={() => { setForm({ ...car }); setEditingId(car.id); setShowForm(false); }} className="p-2 text-slate-400 hover:text-blue-500"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteCarRental(car.id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
 
