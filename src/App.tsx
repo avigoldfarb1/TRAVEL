@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -12,8 +13,26 @@ import Budget from './pages/Budget';
 import Checklist from './pages/Checklist';
 import Report from './pages/Report';
 import Settings from './pages/Settings';
+import { useAuthStore } from './store/authStore';
 
 export default function App() {
+  const { loadUsers, usersLoaded } = useAuthStore();
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  if (!usersLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center" dir="rtl">
+        <div className="text-white text-center space-y-3">
+          <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+          <p className="text-blue-100 text-sm">טוען מערכת...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>

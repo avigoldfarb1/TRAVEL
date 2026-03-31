@@ -44,11 +44,11 @@ export default function Settings() {
     return '';
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const err = validateForm(false);
     if (err) { setError(err); return; }
     try {
-      const ok = addUser(form.username.trim(), form.displayName.trim(), form.password, form.role);
+      const ok = await addUser(form.username.trim(), form.displayName.trim(), form.password, form.role);
       if (!ok) { setError('שם משתמש כבר קיים'); return; }
       setShowAddForm(false);
       setForm(emptyForm());
@@ -66,11 +66,11 @@ export default function Settings() {
     setError('');
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const err = validateForm(true);
     if (err) { setError(err); return; }
     try {
-      updateUser(editingId!, {
+      await updateUser(editingId!, {
         displayName: form.displayName.trim(),
         role: form.role,
         ...(form.password ? { password: form.password } : {}),
@@ -83,12 +83,16 @@ export default function Settings() {
     }
   };
 
-  const handleDelete = (user: AppUser) => {
+  const handleDelete = async (user: AppUser) => {
     if (user.id === currentUser?.id) { setError('לא ניתן למחוק את המשתמש המחובר'); return; }
     if (users.length === 1) { setError('חייב להישאר לפחות משתמש אחד'); return; }
     if (!confirm(`למחוק את המשתמש "${user.displayName}"?`)) return;
-    deleteUser(user.id);
-    flash('משתמש נמחק');
+    try {
+      await deleteUser(user.id);
+      flash('משתמש נמחק');
+    } catch (e) {
+      setError('שגיאה במחיקת המשתמש. נסה שוב.');
+    }
   };
 
   return (
