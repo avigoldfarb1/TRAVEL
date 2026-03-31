@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { hashPassword, checkPassword } from '../utils/hash';
 
 export interface AppUser {
@@ -33,79 +32,111 @@ const initialUser: AppUser = {
   role: 'admin',
 };
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set, get) => ({
-      users: [initialUser],
-      currentUser: null,
-      rememberMe: false,
-      rememberedUsername: '',
+const STORAGE_KEY = 'trip-manager-auth';
 
-      login: (username, password, remember) => {
-        const user = get().users.find(
-          u => u.username.toLowerCase() === username.toLowerCase()
-        );
-        if (!user || !checkPassword(password, user.passwordHash)) return false;
-        set({
-          currentUser: user,
-          rememberMe: remember,
-          rememberedUsername: remember ? username : '',
-        });
-        return true;
-      },
+interface SavedAuth {
+  users: AppUser[];
+  currentUser: AppUser | null;
+  rememberMe: boolean;
+  rememberedUsername: string;
+}
 
-      logout: () => set({ currentUser: null }),
+function loadSaved(): SavedAuth {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { users: [initialUser], currentUser: null, rememberMe: false, rememberedUsername: '' };
+    const parsed = JSON.parse(raw);
+    // Support both old Zustand persist format { state: {...}, version: N } and new direct format
+    const data: Partial<SavedAuth> = parsed.state ?? parsed;
+    return {
+      users: Array.isArray(data.users) && data.users.length > 0 ? data.users : [initialUser],
+      currentUser: data.currentUser ?? null,
+      rememberMe: !!data.rememberMe,
+      rememberedUsername: data.rememberedUsername ?? '',
+    };
+  } catch {
+    return { users: [initialUser], currentUser: null, rememberMe: false, rememberedUsername: '' };
+  }
+}
 
-      addUser: (username, displayName, password, role) => {
-        if (get().usernameExists(username)) return false;
-        const newUser: AppUser = {
-          id: `user-${Date.now()}`,
-          username,
-          displayName,
-          passwordHash: hashPassword(password),
-          role,
-        };
-        set(s => ({ users: [...s.users, newUser] }));
-        return true;
-      },
+function save(data: SavedAuth) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('[authStore] localStorage write failed:', e);
+  }
+}
 
-      updateUser: (id, updates) => set(s => ({
-        users: s.users.map(u => {
-          if (u.id !== id) return u;
-          return {
-            ...u,
-            ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
-            ...(updates.role !== undefined ? { role: updates.role } : {}),
-            ...(updates.password ? { passwordHash: hashPassword(updates.password) } : {}),
-          };
-        }),
-        // refresh currentUser if editing self
-        currentUser: s.currentUser?.id === id
-          ? {
-              ...s.currentUser,
-              ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
-              ...(updates.role !== undefined ? { role: updates.role } : {}),
-            }
-          : s.currentUser,
-      })),
+const initial = loadSaved();
 
-      deleteUser: (id) => set(s => ({
-        users: s.users.filter(u => u.id !== id),
-      })),
+export const useAuthStore = create<AuthStore>((set, get) => ({
+  users: initial.users,
+  currentUser: initial.currentUser,
+  rememberMe: initial.rememberMe,
+  rememberedUsername: initial.rememberedUsername,
 
-      usernameExists: (username, excludeId) =>
-        get().users.some(
-          u => u.username.toLowerCase() === username.toLowerCase() && u.id !== excludeId
-        ),
-    }),
-    {
-      name: 'trip-manager-auth',
-      partialize: (state) => ({
-        users: state.users,
-        currentUser: state.currentUser,
-        rememberMe: state.rememberMe,
-        rememberedUsername: state.rememberedUsername,
-      }),
-    }
-  )
-);
+  login: (username, password, remember) => {
+    const user = get().users.find(
+      u => u.username.toLowerCase() === username.toLowerCase()
+    );
+    if (!user || !checkPassword(password, user.passwordHash)) return false;
+    const currentUser = user;
+    const rememberMe = remember;
+    const rememberedUsername = remember ? username : '';
+    set({ currentUser, rememberMe, rememberedUsername });
+    save({ users: get().users, currentUser, rememberMe, rememberedUsername });
+    return true;
+  },
+
+  logout: () => {
+    set({ currentUser: null });
+    save({ users: get().users, currentUser: null, rememberMe: get().rememberMe, rememberedUsername: get().rememberedUsername });
+  },
+
+  addUser: (username, displayName, password, role) => {
+    if (get().usernameExists(username)) return false;
+    const newUser: AppUser = {
+      id: `user-${Date.now()}`,
+      username,
+      displayName,
+      passwordHash: hashPassword(password),
+      role,
+    };
+    const users = [...get().users, newUser];
+    set({ users });
+    save({ users, currentUser: get().currentUser, rememberMe: get().rememberMe, rememberedUsername: get().rememberedUsername });
+    return true;
+  },
+
+  updateUser: (id, updates) => {
+    const users = get().users.map(u => {
+      if (u.id !== id) return u;
+      return {
+        ...u,
+        ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
+        ...(updates.role !== undefined ? { role: updates.role } : {}),
+        ...(updates.password ? { passwordHash: hashPassword(updates.password) } : {}),
+      };
+    });
+    const currentUser = get().currentUser?.id === id
+      ? {
+          ...get().currentUser!,
+          ...(updates.displayName !== undefined ? { displayName: updates.displayName } : {}),
+          ...(updates.role !== undefined ? { role: updates.role } : {}),
+        }
+      : get().currentUser;
+    set({ users, currentUser });
+    save({ users, currentUser, rememberMe: get().rememberMe, rememberedUsername: get().rememberedUsername });
+  },
+
+  deleteUser: (id) => {
+    const users = get().users.filter(u => u.id !== id);
+    set({ users });
+    save({ users, currentUser: get().currentUser, rememberMe: get().rememberMe, rememberedUsername: get().rememberedUsername });
+  },
+
+  usernameExists: (username, excludeId) =>
+    get().users.some(
+      u => u.username.toLowerCase() === username.toLowerCase() && u.id !== excludeId
+    ),
+}));
