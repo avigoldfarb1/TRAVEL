@@ -33,7 +33,7 @@ export default function Layout() {
 
         {/* Mobile top bar */}
         <header className="md:hidden sticky top-0 z-30 bg-slate-800 text-white flex items-center justify-between px-4 py-3 shadow-md">
-          <p className="text-sm text-slate-300 truncate max-w-[60%]">{trip.name}</p>
+          <img src="/logo.png" alt="מסלול חכם" className="h-8 w-auto" />
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-lg hover:bg-slate-700 transition-colors"

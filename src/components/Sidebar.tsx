@@ -56,9 +56,10 @@ export default function Sidebar({ onClose }: Props) {
     <>
       <aside className="w-64 bg-slate-800 text-white flex flex-col h-full min-h-screen">
 
-        {/* Mobile close button */}
-        <div className="md:hidden flex justify-end p-3 pb-0">
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-700 text-slate-400">
+        {/* Logo */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2">
+          <img src="/logo.png" alt="מסלול חכם" className="h-10 w-auto" />
+          <button onClick={onClose} className="md:hidden p-2 rounded-lg hover:bg-slate-700 text-slate-400">
             <X className="w-5 h-5" />
           </button>
         </div>
