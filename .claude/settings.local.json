@@ -31,7 +31,8 @@
       "Bash(vercel --prod --yes)",
       "Bash(vercel ls:*)",
       "Bash(vercel alias:*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(gh run:*)"
     ]
   }
 }
